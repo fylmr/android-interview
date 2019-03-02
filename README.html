@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+        <title>Вопросы к собеседованию по Android</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+        <link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', 'HelveticaNeue-Light', 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        
+        <script src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+    </head>
+    <body>
+        <h1 id="%D0%B2%D0%BE%D0%BF%D1%80%D0%BE%D1%81%D1%8B-%D0%BA-%D1%81%D0%BE%D0%B1%D0%B5%D1%81%D0%B5%D0%B4%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D1%8E-%D0%BF%D0%BE-android">Вопросы к собеседованию по Android</h1>
+<ul>
+<li><a href="#%D0%B2%D0%BE%D0%BF%D1%80%D0%BE%D1%81%D1%8B-%D0%BA-%D1%81%D0%BE%D0%B1%D0%B5%D1%81%D0%B5%D0%B4%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D1%8E-%D0%BF%D0%BE-android">Вопросы к собеседованию по Android</a>
+<ul>
+<li><a href="#%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%82%D1%83%D1%80%D1%8B-%D0%B4%D0%B0%D0%BD%D0%BD%D1%8B%D1%85">Структуры данных</a></li>
+<li><a href="#java">Java</a></li>
+<li><a href="#android">Android</a></li>
+<li><a href="#%D0%B0%D1%80%D1%85%D0%B8%D1%82%D0%B5%D0%BA%D1%82%D1%83%D1%80%D0%B0">Архитектура</a></li>
+<li><a href="#%D0%B1%D0%B8%D0%B1%D0%BB%D0%B8%D0%BE%D1%82%D0%B5%D0%BA%D0%B8">Библиотеки</a>
+<ul>
+<li><a href="#moxy">Moxy</a></li>
+<li><a href="#rxjava">RxJava</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%82%D1%83%D1%80%D1%8B-%D0%B4%D0%B0%D0%BD%D0%BD%D1%8B%D1%85">Структуры данных</h2>
+<h2 id="java">Java</h2>
+<ul>
+<li>
+<p>Виды референсов: <a href="https://habr.com/ru/post/169883/">https://habr.com/ru/post/169883/</a></p>
+<ol>
+<li><strong>SoftReference</strong> — если GC видит что объект доступен только через цепочку soft-ссылок, то он удалит его из памяти, если памяти будет не хватать. Удобно для кеширования.</li>
+<li><strong>WeakReference</strong> — если GC видит что объект доступен только через цепочку weak-ссылок, то он удалит его из памяти. Применение: WeakHashMap. Это реализация Map&lt;K,V&gt; которая хранит ключ, используя weak-ссылку. И когда GC удаляет ключ с памяти, то удаляется вся запись с Map. Думаю не сложно понять, как это происходит.</li>
+<li><strong>PhantomReference</strong> — если GC видит что объект доступен только через цепочку phantom-ссылок, то он его удалит из памяти. После нескольких запусков GC.<br>
+Особенностей у этого типа ссылок две. Первая это то, что метод <strong>get() всегда возвращает null</strong>. Именно из-за этого PhantomReference имеет смысл использовать только вместе с ReferenceQueue. Вторая особенность – в отличие от SoftReference и WeakReference, GC добавит phantom-ссылку в ReferenceQueue после того как выполнится метод finalize(). То есть фактически, в отличии от SoftReference и WeakReference, объект еще есть в памяти.</li>
+</ol>
+</li>
+<li>
+<p>Volatile/Atomic</p>
+<ul>
+<li><em>volatile</em> помечает объект как доступный для нескольких тредов. Операция инкремента не атомарна, из-за чего процесс будет сбоить</li>
+<li><em>Atomic</em>-классы использут compare and swap алгоритм: обновляет значение, только если предыдущее совпадает с ожидаемым old value.</li>
+</ul>
+</li>
+</ul>
+<h2 id="android">Android</h2>
+<ul>
+<li>
+<p>Жизненный цикл Activity</p>
+<ul>
+<li><code>OnCreate()</code> Создаётся view.</li>
+<li><code>OnStart()</code> Активити становится видно</li>
+<li><code>OnResume()</code> Активити становится доступным для ввода пользователя</li>
+<li><code>OnPause()</code> Активити видно, но недоступо для ввода пользователя (важно для многооконного режима)</li>
+<li><code>OnStop()</code> Активити больше не видно</li>
+<li><code>OnDestroy()</code> Активити уничтожается</li>
+<li><code>OnRestart()</code> Активити пересоздаётся, вызывается после уничтожения и перед созданием</li>
+</ul>
+</li>
+<li>
+<p>Когда <code>onDestroy()</code> вызывается без <code>onPause()</code> и <code>onStop()</code>?</p>
+<ul>
+<li>Если активити закрывается через метод <code>finish()</code> до начала onStart и onResume.</li>
+</ul>
+</li>
+<li>
+<p>Почему <code>setContentView()</code> располагают в <code>onCreate()</code></p>
+<ul>
+<li>Это тяжёлая операция, и выгоднее производить её только единожды, при создании активити.</li>
+</ul>
+</li>
+<li>
+<p>Launch modes</p>
+<ul>
+<li><strong>Standard</strong> При вызове, активити создаётся заново.</li>
+<li><strong>SingleTop</strong> Активити создаётся заново, только если она не вверху активити-стека.</li>
+<li><strong>SingleTask</strong> Стек стирается до момента, пока эта активити не окажется наверху стека.</li>
+<li><strong>SingleInstance</strong> Похож на SingleTask, но при создании активити, она уйдёт в новый таск.</li>
+</ul>
+</li>
+<li>
+<p>Как очистить бэкстек при создании активити</p>
+<ul>
+<li>Использовать флаг <code>FLAG_ACTIVITY_CLEAR_TOP</code>.</li>
+<li>Использовать <code>FLAG_ACTIVITY_CLEAR_TASK</code> и <code>FLAG_ACTIVITY_NEW_TASK</code> вместе.</li>
+</ul>
+</li>
+<li>
+<p>Разница между <code>FLAG_ACTIVITY_CLEAR_TASK</code> и <code>FLAG_ACTIVITY_CLEAR_TOP</code></p>
+<ul>
+<li>Первый очистит всё, что есть в таске, второй — только до той же активити, что и запускаемая.</li>
+</ul>
+</li>
+<li>
+<p>Жизненный цикл Fragment</p>
+<ul>
+<li><img src="https://i.stack.imgur.com/fRxIQ.png" alt="Жизненный цикл фрагмента"></li>
+</ul>
+</li>
+<li>
+<p>Описать Content Provider</p>
+<ul>
+<li>Позволяет передавать данные между приложениями и процессами. Используется в связке с <code>ContentResolver</code>.</li>
+</ul>
+</li>
+<li>
+<p>Описать Service/IntentService</p>
+<ul>
+<li>Часть приложения без UI</li>
+<li><strong>Foreground</strong> Выполняется в основном потоке. Во время исполнения показывает уведомление. Пример — аудиоплеер.</li>
+<li><strong>Background</strong> Выполняется в фоновом потоке. Начиная с API 26, приложения в фоне не могут создавать фоновые сервисы, решением в этом случае может быть <code>WorkManager</code>.</li>
+<li><strong>Bound</strong> Клиент-серверный подход: посылаем запросы, получаем результаты.</li>
+<li><strong>IntentService</strong> Создаёт и работает в собственном потоке.</li>
+</ul>
+</li>
+<li>
+<p>Описать Handler</p>
+<ul>
+<li>Handler - это механизм, который позволяет работать с очередью сообщений между потоками. Он привязан к конкретному потоку и работает с его очередью. Handler умеет помещать сообщения в очередь. При этом он ставит самого себя в качестве получателя этого сообщения. И когда приходит время, система достает сообщение из очереди и отправляет его адресату (т.е. в Handler) на обработку.</li>
+</ul>
+</li>
+<li>
+<p>Разница между Serializable и Parcelable</p>
+<ul>
+<li>В первом используется рефлексия, довольно медленный процесс, однако разработчику нужно писать меньше кода. В Parcelable мы описываем только те вещи, которые нужно сериализовать, из-за чего кода становится больше.</li>
+</ul>
+</li>
+<li>
+<p>Как обновить UI-поток из фонового сервиса</p>
+<ul>
+<li>Использовать Local Broadcast.</li>
+</ul>
+</li>
+<li>
+<p>Виды Intent-ов</p>
+<ul>
+<li><strong>Implicit</strong> Вызываете системный интент: отправить СМС, позвонить, открыть карты и так далее</li>
+<li><strong>Explicit</strong> Вызов других активити внутри приложения</li>
+<li><strong>Sticky</strong> Интент, который остаётся после завершения бродкаста. Например, при подписке на <code>ACTION_BATTERY_CHANGED</code>, мы получим последний посланный интент. Поэтому, если нам нужно только текущее состояние батареи, слушать дальнейшие бродкасты не обязательно.</li>
+<li><strong>Pending</strong> Интент, который может быть исполнен в будущем на правах вашего приложения</li>
+</ul>
+</li>
+<li>
+<p>Из-за чего возникает ошибка Application Not Responding (ANR)</p>
+<ul>
+<li>Когда UI не отвечает 5 секунд. Случается обычно из-за блокированного главного треда.</li>
+</ul>
+</li>
+<li>
+<p>BroadcastReceiver в Android 8</p>
+<ol>
+<li>Apps that target Android 8.0 or higher can no longer register broadcast receivers for implicit broadcasts in their manifest. An implicit broadcast is a broadcast that does not target that app specifically. For example, ACTION_PACKAGE_REPLACED is an implicit broadcast, since it is sent to all registered listeners, letting them know that some package on the device was replaced. However, ACTION_MY_PACKAGE_REPLACED is not an implicit broadcast, since it is sent only to the app whose package was replaced, no matter how many other apps have registered listeners for that broadcast.</li>
+<li>Apps can continue to register for explicit broadcasts in their manifests.</li>
+<li>Apps can use Context.registerReceiver() at runtime to register a receiver for any broadcast, whether implicit or explicit.</li>
+<li>Broadcasts that require a signature permission are exempted from this restriction, since these broadcasts are only sent to apps that are signed with the same certificate, not to all the apps on the device.</li>
+</ol>
+</li>
+<li>
+<p>Может ли приложение работать в разных процессах? Зачем это нужно? Как можно организовать межпроцессорное взаимодействие?</p>
+<ul>
+<li>Может. Для частей приложения (активити, сервисы, бродкасты и контент провайдеры) надо указать флаг process.</li>
+<li>+: Получаем больше памяти. Не всё приложение при недостатке памяти будет убито.</li>
+<li>-: Поскольку каждый процесс живёт в отдельном инстансе Дальвика, делиться информацией сложно. Для этого используются AIDL, интенты, handler-ы, messenger-ы</li>
+</ul>
+</li>
+<li>
+<p>onTouchEvent()</p>
+<ul>
+<li><a href="https://stfalcon.com/ru/blog/post/learning-android-gestures">https://stfalcon.com/ru/blog/post/learning-android-gestures</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="%D0%B0%D1%80%D1%85%D0%B8%D1%82%D0%B5%D0%BA%D1%82%D1%83%D1%80%D0%B0">Архитектура</h2>
+<h2 id="%D0%B1%D0%B8%D0%B1%D0%BB%D0%B8%D0%BE%D1%82%D0%B5%D0%BA%D0%B8">Библиотеки</h2>
+<h3 id="moxy">Moxy</h3>
+<ul>
+<li>Moxy создаёт $$PresenterBinder, хранит хеш-мапы c биндерами в MoxyReflector</li>
+</ul>
+<h3 id="rxjava">RxJava</h3>
+<ul>
+<li>Subjects
+<ul>
+<li>Publish Subject: Излучает(emit) все последующие элементы наблюдаемого источника в момент подписки.</li>
+<li>Replay Subject: Излучает(emit все элементы источника наблюдаемого(Observable), независимо от того, когда подписчик(subscriber) подписывается.</li>
+<li>Behavior Subject: Он излучает(emit) совсем недавно созданый элемент и все последующие элементы наблюдаемого источника, когда наблюдатель(observer) присоединяется к нему.</li>
+<li>Async Subject: Он выдает только последнее значение наблюдаемого источника(и только последнее). Чтоб его подписчики получили содержание, на сабджекте нужно вызвать onComplete</li>
+</ul>
+</li>
+</ul>
+
+    </body>
+    </html>
