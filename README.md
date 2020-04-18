@@ -8,6 +8,7 @@
   - [Services](#services)
   - [Broadcasts](#broadcasts)
   - [Custom Views](#custom-views)
+  - [ViewModel](#viewmodel)
   - [Другое](#%D0%B4%D1%80%D1%83%D0%B3%D0%BE%D0%B5)
 - [Архитектура](#%D0%B0%D1%80%D1%85%D0%B8%D1%82%D0%B5%D0%BA%D1%82%D1%83%D1%80%D0%B0)
 - [Библиотеки](#%D0%B1%D0%B8%D0%B1%D0%BB%D0%B8%D0%BE%D1%82%D0%B5%D0%BA%D0%B8)
@@ -139,6 +140,18 @@
 
 - onTouchEvent()
   - https://stfalcon.com/ru/blog/post/learning-android-gestures
+  
+## ViewModel
+- Краткое устройство ViewModel (AndroidX, [исходный код](https://android.googlesource.com/platform/frameworks/support/+/refs/heads/androidx-master-dev/lifecycle/lifecycle-viewmodel/src/main/java/androidx/lifecycle?source=post_page---------------------------%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F&autodive=0%2F%2F%2F "исходный код"))
+[![Диаграмма классов](https://cdn.hashnode.com/res/hashnode/image/upload/v1585478386526/eh4VTpAqP.png?auto=format&q=60 "Диаграмма классов")](https://charlesmuchene.hashnode.dev/surviving-configuration-change-viewmodel-ck8cyte8u00nfxes1o6s76r1m "Диаграмма классов")
+  - В активити мы получаем ссылку на ViewModel, используя 
+  ```java
+    ViewModelProvider(this).get(ViewModel::class.java);
+  ```
+  - `ViewModelProvider` создаёт вью-модель и сохраняет её во `ViewModelStore`.
+  - Параметр, который мы передаём как `this` при получении `ViewModelProvider` имеет тип `ViewModelStoreOwner`, который как раз и хранит `ViewModelStore`. Если отследить, какие классы наследует наша активити, то видно, что она наследуется от [ComponentActivity](https://android.googlesource.com/platform/frameworks/support/+/8514bc0f4d930b5470435aa365719b2a6a3ad2f3/activity/src/main/java/androidx/activity/ComponentActivity.java "`ComponentActivity`"), которая реализует интерфейс `ViewModelStoreOwner`.
+  - Когда активити пересоздаётся, она сохраняет текущий `ViewModelStore`, используя свои методы `onRetainNonConfigurationInstance()` и `getLastCustomNonConfigurationInstance()`, а также статический класс `NonConfigurationInstances`.
+  - Также активити имеет `LifecycleEventObserver`, который слушает изменения жизненного цикла и, при уничтожении активити, вызывает `getViewModelStore().clear()`.
 
 ## Другое
 
@@ -146,8 +159,8 @@
   - В первом используется рефлексия, довольно медленный процесс, однако разработчику нужно писать меньше кода. В Parcelable мы описываем только те вещи, которые нужно сериализовать, из-за чего кода становится больше. 
 
 - Виды Intent-ов
-  - **Implicit** Вызываете системный интент: отправить СМС, позвонить, открыть карты и так далее
-  - **Explicit** Вызов других активити внутри приложения
+  - **Implicit** (неявный) Вызываете системный интент: отправить СМС, позвонить, открыть карты и так далее
+  - **Explicit** (явный) Вызов других активити внутри приложения
   - **Sticky** Интент, который остаётся после завершения бродкаста. Например, при подписке на `ACTION_BATTERY_CHANGED`, мы получим последний посланный интент. Поэтому, если нам нужно только текущее состояние батареи, слушать дальнейшие бродкасты не обязательно. 
   - **Pending** Интент, который может быть исполнен в будущем на правах вашего приложения 
 
