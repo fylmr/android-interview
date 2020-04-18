@@ -9,9 +9,11 @@
   - [Broadcasts](#broadcasts)
   - [Custom Views](#custom-views)
   - [ViewModel](#viewmodel)
-  - [Другое](#%D0%B4%D1%80%D1%83%D0%B3%D0%BE%D0%B5)
-- [Архитектура](#%D0%B0%D1%80%D1%85%D0%B8%D1%82%D0%B5%D0%BA%D1%82%D1%83%D1%80%D0%B0)
-- [Библиотеки](#%D0%B1%D0%B8%D0%B1%D0%BB%D0%B8%D0%BE%D1%82%D0%B5%D0%BA%D0%B8)
+  - [Другое](#%d0%94%d1%80%d1%83%d0%b3%d0%be%d0%b5)
+- [Kotlin](#kotlin)
+  - [Inline-функции](#inline-%d1%84%d1%83%d0%bd%d0%ba%d1%86%d0%b8%d0%b8)
+- [Архитектура](#%d0%90%d1%80%d1%85%d0%b8%d1%82%d0%b5%d0%ba%d1%82%d1%83%d1%80%d0%b0)
+- [Библиотеки](#%d0%91%d0%b8%d0%b1%d0%bb%d0%b8%d0%be%d1%82%d0%b5%d0%ba%d0%b8)
   - [Moxy](#moxy)
   - [RxJava](#rxjava)
 
@@ -145,9 +147,9 @@
 - Краткое устройство ViewModel (AndroidX, [исходный код](https://android.googlesource.com/platform/frameworks/support/+/refs/heads/androidx-master-dev/lifecycle/lifecycle-viewmodel/src/main/java/androidx/lifecycle?source=post_page---------------------------%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F&autodive=0%2F%2F%2F "исходный код"))
 [![Диаграмма классов](https://cdn.hashnode.com/res/hashnode/image/upload/v1585478386526/eh4VTpAqP.png?auto=format&q=60 "Диаграмма классов")](https://charlesmuchene.hashnode.dev/surviving-configuration-change-viewmodel-ck8cyte8u00nfxes1o6s76r1m "Диаграмма классов")
   - В активити мы получаем ссылку на ViewModel, используя 
-  ```java
-    ViewModelProvider(this).get(ViewModel::class.java);
-  ```
+    ```java
+      ViewModelProvider(this).get(ViewModel::class.java);
+    ```
   - `ViewModelProvider` создаёт вью-модель и сохраняет её во `ViewModelStore`.
   - Параметр, который мы передаём как `this` при получении `ViewModelProvider` имеет тип `ViewModelStoreOwner`, который как раз и хранит `ViewModelStore`. Если отследить, какие классы наследует наша активити, то видно, что она наследуется от [ComponentActivity](https://android.googlesource.com/platform/frameworks/support/+/8514bc0f4d930b5470435aa365719b2a6a3ad2f3/activity/src/main/java/androidx/activity/ComponentActivity.java "`ComponentActivity`"), которая реализует интерфейс `ViewModelStoreOwner`.
   - Когда активити пересоздаётся, она сохраняет текущий `ViewModelStore`, используя свои методы `onRetainNonConfigurationInstance()` и `getLastCustomNonConfigurationInstance()`, а также статический класс `NonConfigurationInstances`.
@@ -197,6 +199,37 @@ class App : Application() {
     }
 }
 ```
+
+# Kotlin
+
+## Inline-функции
+- Здесь и далее основано на статье [ч.1](https://proandroiddev.com/dissecting-the-inline-keyword-in-kotlin-chapter-1-51735600d7), [ч.2](https://proandroiddev.com/dissecting-the-inline-keyword-in-kotlin-chapter-2-32f4bc0fcbf9). Примеры кода смотреть в них.
+
+- Зачем в котлине ключевое слово `inline`
+  - В Котлине функции рассматриваются как любые другие значения: они могут быть переданы в и возвращены из методов, сохранены в переменные или в структуры данных. Чтобы поддержать это, Котлин использует семейство функциональных типов. Тогда, чтобы работать с *лямбдами*, Котлин создаёт объекты, реализующие интерфейсы `Function0`, `Function1` и так далее.
+  - Когда в лямбде нет замыкания (грубо говоря: из лямбды не вызываются переменные и методы, которые не лежат внутри самой лямбды), для её реализации компялтор создаёт синглтон. Но для лямбды с замыканием компилятор вынужен создавать инстанс для каждого вызова лямбды. Если лямбда вызывается в цикле, это может даже привести к OOM (нехватке памяти).
+  - В таком случае на помощь приходит ключевое слово `inline`: оно говорит компилятору, что содержимое лямбды нужно встроить в место её вызова, как будто мы написали код не внутри лямбды, а прямо в теле метода. 
+- Для чего нужно ключевое слово `reified`
+  - В Java существует такая концепция, как Type Erasure — стирание типов. Коротко говоря, это проблема, возникающая при работе с дженериками. Из-за неё, например, нельзя сделать проверку типа `new ArrayList<String>() instanceof List<String>`: в рантайме джава-машина не знает, какие конкретно типы лежат внутри дженерика. 
+  - Поскольку в Андроиде Котлин использует рантайм Джавы, проблема остаётся: мы не можем проверить, что `arrayListOf<String>() is List<String>`. 
+  - Но используя `inline` функции, мы можем избежать стирания типов с помощью применения модификатора `reified` к дженерику: 
+    ```kotlin
+    inline fun <reified T> myGenericFunction(value: T): T {...}
+    ```
+- `crossinline` и `noinline`
+  - Поскольку мы встраиваем код лямбды на место вызова, `return`, написанный в лямбде, закончит выполнение не лямбды, а всей функции. Когда нам это не нужно, мы можем пометить лямбда-параметр функции как `crossinline`, что запретит нелокальные `return`ы.
+    ```kotlin
+    inline fun function(crossinline nonLocalReturnBlockedLambda: () -> Unit) {...}
+    ```
+  - Порой в inline функции нам нужно не вызвать лямбду на месте, а передать дальше, в другой метод. Тогда лямбда-параметр можно пометить как `noinline`, и он не будет встраиваться в место вызова. 
+    ```kotlin
+    inline fun parameterPassedToOtherInlineFunction(lambda1: () -> Unit, noinline lambda2: () -> Boolean) {
+        // эта лямбда встроится
+        lambda1.invoke()
+        // а эта останется лямбдой и будет передана в другой метод
+        someNonInlinedLambdaConsumingFunction(lambda2)
+    }
+    ```
 
 # Архитектура
 
